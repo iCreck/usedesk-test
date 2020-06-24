@@ -1,0 +1,30 @@
+version: '3.3'
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    ports:
+      - 8080:80
+    volumes:
+      - ./src/storage:/var/www/html/storage
+    links:
+      - app
+  app:
+    build:
+      context: ./src
+    volumes:
+      - ./src:/var/www/html
+    links:
+      - database
+  database:
+    image: mysql:5.7
+    restart: unless-stopped
+    ports:
+      - 33061:3306
+    volumes:
+      - ./docker/data/mysql:/var/lib/mysql/
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=usedesk
