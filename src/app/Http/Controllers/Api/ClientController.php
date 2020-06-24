@@ -7,7 +7,7 @@ use App\Http\Requests\Api\Client\CreateRequest;
 use App\Http\Requests\Api\Client\UpdateRequest;
 use App\Models\Client;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class ClientController extends BaseController
 {
@@ -62,9 +62,9 @@ class ClientController extends BaseController
      * @param  Client  $client
      * @return JsonResponse
      */
-    public function update(Request $request, Client $client)
+    public function update(UpdateRequest $request, Client $client)
     {
-        return response()->json($this->clientService->update($request, $client->id));
+        return response()->json($this->clientService->update($request, $client));
     }
 
     /**
@@ -75,6 +75,6 @@ class ClientController extends BaseController
      */
     public function destroy(Client $client)
     {
-        return response()->json($this->clientService->delete($client->id));
+        return response()->json($this->clientService->delete($client), Response::HTTP_NO_CONTENT);
     }
 }

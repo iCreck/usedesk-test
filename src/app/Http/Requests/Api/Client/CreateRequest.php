@@ -26,20 +26,12 @@ class CreateRequest extends BaseRequest
         return [
             'name' => 'bail|required|string',
             'lastname' => 'bail|required|string',
-        ];
-    }
-
-    public function messages()
-    {
-        return [
-            'name' => [
-                'required' => 'Введите имя',
-                'string' => 'Имя должно быть строкой',
-            ],
-            'lastname' => [
-                'required' => 'Введите имя',
-                'string' => 'Имя должно быть строкой',
-            ],
+            'phones' => 'array|min:1',
+            'phones.*' => 'array',
+            'phones.*.phone' => 'bail|string|regex:/(\+)\d{11,13}/|unique:phones,phone',
+            'emails' => 'array|min:1',
+            'emails.*' => 'array',
+            'emails.*.email' => 'email|unique:emails,email',
         ];
     }
 }
