@@ -6,6 +6,8 @@ use App\Contracts\ClientInterface;
 use App\Http\Requests\Api\Client\CreateRequest;
 use App\Http\Requests\Api\Client\UpdateRequest;
 use App\Models\Client;
+use App\Models\Email;
+use App\Models\Phone;
 use Illuminate\Support\Collection;
 
 /**
@@ -47,6 +49,25 @@ class ClientService implements ClientInterface
         $this->processPhones($client, $validated['phones']);
         $this->processEmails($client, $validated['emails']);
         return $client->refresh();
+    }
+
+    public function search(string $mode, array $query): Collection
+    {
+        switch ($mode) {
+            case 'name':
+                return $this->findByName($query['name']);
+            case 'phone':
+                return $this->findByPhone($query['phone']);
+            case 'email':
+                return $this->findByEmail($query['email']);
+            case 'all':
+                $clients = $this->findByName($query['name'])
+                    ->merge($this->findByPhone($query['phone']))
+                    ->merge($this->findByEmail($query['email']));
+                return $clients;
+            default:
+                return [];
+        }
     }
 
     protected function processPhones(Client $client, array $phones)
@@ -94,6 +115,27 @@ class ClientService implements ClientInterface
         });
         return $itemsList->filter(function ($item) use ($newIds) {
             return !$newIds->contains($item->id);
+        });
+    }
+
+    protected function findByName(string $query)
+    {
+        return Client::search($query)->get();
+    }
+
+    protected function findByPhone(string $query)
+    {
+        $phones = Phone::search($query)->get();
+        return $phones->map(function ($phone) {
+            return $phone->client;
+        });
+    }
+
+    protected function findByEmail(string $query)
+    {
+        $emails = Email::search($query)->get();
+        return $emails->map(function ($email) {
+            return $email->client;
         });
     }
 }

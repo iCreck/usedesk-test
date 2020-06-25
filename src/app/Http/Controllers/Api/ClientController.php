@@ -7,10 +7,13 @@ use App\Http\Requests\Api\Client\CreateRequest;
 use App\Http\Requests\Api\Client\UpdateRequest;
 use App\Models\Client;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ClientController extends BaseController
 {
+    const AVAILABLE_SEARCH_METHODS = ['name', 'phone', 'email', 'all'];
+
     /** @var ClientInterface */
     private $clientService;
 
@@ -28,8 +31,19 @@ class ClientController extends BaseController
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
+        if (
+            $request->query->has('searchBy') &&
+            in_array($request->query->get('searchBy'), self::AVAILABLE_SEARCH_METHODS)
+        ) {
+            $searchData = [
+                'name' => $request->query->get('name', ''),
+                'phone' => $request->query->get('phone', ''),
+                'email' => $request->query->get('email', ''),
+            ];
+            return response()->json($this->clientService->search($request->query->get('searchBy'), $searchData));
+        }
         return response()->json($this->clientService->findAll());
     }
 
