@@ -75,6 +75,6 @@ class ClientController extends BaseController
      */
     public function destroy(Client $client)
     {
-        return response()->json($this->clientService->delete($client), Response::HTTP_NO_CONTENT);
+        return response()->json($client->delete(), Response::HTTP_NO_CONTENT);
     }
 }

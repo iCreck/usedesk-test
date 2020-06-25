@@ -6,9 +6,6 @@ use App\Contracts\ClientInterface;
 use App\Http\Requests\Api\Client\CreateRequest;
 use App\Http\Requests\Api\Client\UpdateRequest;
 use App\Models\Client;
-use App\Models\Email;
-use App\Models\Phone;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 /**
@@ -47,36 +44,39 @@ class ClientService implements ClientInterface
     {
         $validated = $request->validated();
         $client->update($validated);
-        // @todo Implement phones and emails updating
-        return $client->fresh();
+        $this->processPhones($client, $validated['phones']);
+        $this->processEmails($client, $validated['emails']);
+        return $client->refresh();
     }
 
-    /**
-     * @param Client $client
-     * @return string
-     * @throws \Exception
-     */
-    public function delete(Client $client): string
+    protected function processPhones(Client $client, array $phones)
     {
-        $client = $this->findById($id);
-        $client->delete();
-        return 'Deleted';
-    }
-
-    private function processPhones(Client $client, array $phones)
-    {
+        $unusedIds = $this->getUnusedIds($client->phones, $phones);
+        $unusedIds->each(function ($element) use ($client) {
+            $client
+                ->phones()
+                ->where('id', $element->id)
+                ->delete();
+        });
         foreach ($phones as $phone) {
             $client->phones()->updateOrCreate(
                 [
-                    'id' => isset($phone['id']) ?: null,
+                    'id' => array_key_exists('id', $phone) ? $phone['id'] : null,
                 ],
                 $phone
             );
         }
     }
 
-    private function processEmails(Client $client, array $emails)
+    protected function processEmails(Client $client, array $emails)
     {
+        $unusedIds = $this->getUnusedIds($client->emails, $emails);
+        $unusedIds->each(function ($element) use ($client) {
+            $client
+                ->emails()
+                ->where('id', $element->id)
+                ->delete();
+        });
         foreach ($emails as $email) {
             $client->emails()->updateOrCreate(
                 [
@@ -85,5 +85,15 @@ class ClientService implements ClientInterface
                 $email
             );
         }
+    }
+
+    protected function getUnusedIds(Collection $itemsList, array $newItemsList)
+    {
+        $newIds = collect($newItemsList)->map(function ($search) {
+            return array_key_exists('id', $search) ? $search['id'] : null;
+        });
+        return $itemsList->filter(function ($item) use ($newIds) {
+            return !$newIds->contains($item->id);
+        });
     }
 }

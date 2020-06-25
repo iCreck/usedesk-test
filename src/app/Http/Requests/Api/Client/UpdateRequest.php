@@ -50,9 +50,11 @@ class UpdateRequest extends BaseRequest
 
     private function validatePhone($phone, $client)
     {
+        $id = array_key_exists('id', $phone) ? $phone['id'] : null;
         return Validator::make($phone, [
             'id' => [
                 'integer',
+                'nullable',
                 function ($attribute, $value, $fail) use ($client) {
                     if ($client->phones->where('id', $value)->count() === 0) {
                         $fail(sprintf('Id %d of phone doesn\'t belongs to this client', $value));
@@ -60,15 +62,17 @@ class UpdateRequest extends BaseRequest
                     return true;
                 },
             ],
-            'phone' => ['regex:/(\+)\d{11,13}/', Rule::unique('phones', 'phone')->ignore($phone['id'])],
+            'phone' => ['regex:/(\+)\d{11,13}/', Rule::unique('phones', 'phone')->ignore($id)],
         ]);
     }
 
     private function validateEmail($email, $client)
     {
+        $id = array_key_exists('id', $email) ? $email['id'] : null;
         return Validator::make($email, [
             'id' => [
                 'integer',
+                'nullable',
                 function ($attribute, $value, $fail) use ($client) {
                     if ($client->emails->where('id', $value)->count() === 0) {
                         $fail(sprintf('Id %d of email doesn\'t belongs to this client', $value));
@@ -76,7 +80,7 @@ class UpdateRequest extends BaseRequest
                     return true;
                 },
             ],
-            'email' => ['email', Rule::unique('emails', 'email')->ignore($email['id'])],
+            'email' => ['email', Rule::unique('emails', 'email')->ignore($id)],
         ]);
     }
 }
