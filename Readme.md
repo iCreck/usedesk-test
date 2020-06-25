@@ -20,7 +20,74 @@ docker-compose exec app php artisan migrate # накатываем миграц�
 docker-compose exec app php artisan db:seed # заполнение данными
 ```
 
+По умолчанию api доступен по адресу http://localhost:8080
+
 #### Описание API
+
+##### Регистрация пользователя
+
+> <u>POST</u> /register
+
+Пример тела запроса:
+
+```json
+{
+  "name": "testUser",
+  "email": "test@email.com",
+  "password": "password",
+  "password_confirmation": "password"
+}
+```
+
+Пример тела ответа:
+
+```json
+{
+  "name": "testUser",
+  "email": "test@email.com",
+  "updated_at": "2020-06-25 09:35:19",
+  "created_at": "2020-06-25 09:35:19",
+  "id": 1,
+  "api_token": "rKAHw1TUHWCNwjVxgTllWqncY6xnAl"
+}
+```
+
+##### Авторизация пользователя
+
+> <u>POST</u> /login
+
+Пример тела запроса:
+
+```json
+{
+  "email": "test@email.com",
+  "password": "password",
+}
+```
+
+Пример тела ответа:
+
+```json
+{
+  "id": 1,
+  "name": "testUser",
+  "email": "test@email.com",
+  "email_verified_at": null,
+  "created_at": "2020-06-25 09:35:19",
+  "updated_at": "2020-06-25 09:35:19",
+  "api_token": "rKAHw1TUHWCNwjVxgTllWqncY6xnAl"
+}
+```
+
+##### Выход
+
+> <u>POST</u> /logout
+
+Ответ:
+
+```json
+"User logged out."
+```
 
 ##### Получение списка клиентов
 
@@ -80,8 +147,6 @@ docker-compose exec app php artisan db:seed # заполнение данным�
 ]
 ```
 
-
-
 ##### Создание клиента
 
 > <u>POST</u> /api/clients
@@ -138,8 +203,6 @@ docker-compose exec app php artisan db:seed # заполнение данным�
   ]
 }
 ```
-
-
 
 ##### Изменение клиента
 
