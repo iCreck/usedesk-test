@@ -14,3 +14,7 @@
 Route::post('register', 'Auth\RegisterController@register');
 Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout');
+
+Route::get('logs', function () {
+    return response()->json(\App\Models\Log::orderBy('created_at', 'desc')->get());
+});
